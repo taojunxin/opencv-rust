@@ -318,7 +318,7 @@ impl Library {
 				if path.is_empty() {
 					None
 				} else {
-					Some(format!("cargo:rustc-link-search=native={}", path))
+					Some(format!("cargo:rustc-link-search={}", path))
 				}
 			})
 		);
@@ -438,10 +438,19 @@ fn file_copy_to_dir(src_file: &Path, target_dir: &Path) -> Result<PathBuf> {
 }
 
 fn get_version_from_headers(header_dir: &PathBuf) -> Option<String> {
-	let version_hpp = header_dir.join("opencv2/core/version.hpp");
-	if !version_hpp.is_file() {
-		return None;
-	}
+	let version_hpp = {
+		let out = header_dir.join("opencv2/core/version.hpp");
+		if out.is_file() {
+			out
+		} else {
+			let out = header_dir.join("core/version.hpp");
+			if out.is_file() {
+				out
+			} else {
+				return None;
+			}
+		}
+	};
 	let mut major = None;
 	let mut minor = None;
 	let mut revision = None;
@@ -665,12 +674,12 @@ fn main() -> Result<()> {
 	eprintln!("=== OpenCV library configuration: {:#?}", opencv);
 	if !cfg!(feature = "docs-only") {
 		check_matching_version(&opencv.version)
-			.map_err(|e| format!("{}, (version coming from pkg_config for package: {})", e, opencv.pkg_name))?;
+			.map_err(|e| format!("{}, (version coming from the detected package/environment)", e))?;
 	}
 	let opencv_header_dir = env::var_os("OPENCV_HEADER_DIR").map(PathBuf::from).unwrap_or_else(|| {
 		if cfg!(feature = "buildtime-bindgen") {
 			opencv.include_paths.iter()
-				.find(|p| p.join("opencv2").exists())
+				.find(|p| p.join("opencv2/core/version.hpp").is_file() || p.join("core/version.hpp").is_file())
 				.expect("Using buildtime-bindgen, but discovered OpenCV include paths is empty or contains non-existent paths").clone()
 		} else if cfg!(feature = "opencv-32") {
 			MANIFEST_DIR.join("headers/3.2")

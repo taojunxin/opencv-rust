@@ -142,7 +142,7 @@ other platforms, then `pkg_config` or `vcpkg` usage will be disabled and the set
 * `OPENCV_INCLUDE_PATHS`
   Comma separated list of paths to search for system include files during compilation. E.g.
   "C:\tools\opencv\build\include". One of the directories specified therein must contain
-  "opencv2/core/version.hpp" file, it's used to detect the version of the headers.
+  "opencv2/core/version.hpp" or "core/version.hpp" file, it's used to detect the version of the headers.
 
 The following variables are optional, but you might need to set them under some circumstances:
 

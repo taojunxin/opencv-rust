@@ -20,8 +20,15 @@ if [[ "$OS_FAMILY" == "windows" ]]; then
 	echo "=== Installed chocolatey packages:"
 	choco list --local-only
 elif [[ "$OS_FAMILY" == "osx" ]]; then
-	if [[ "$MACOS_OPENCV_VERSION" == "@3" ]]; then
-		export PKG_CONFIG_PATH="/usr/local/opt/opencv@3/lib/pkgconfig"
+	if [[ "$BREW_OPENCV_VERSION" != "" ]]; then # brew build
+		if [[ "$BREW_OPENCV_VERSION" == "@3" ]]; then
+			export PKG_CONFIG_PATH="/usr/local/opt/opencv@3/lib/pkgconfig"
+		fi
+	else # framework build
+		export OPENCV_LINK_PATHS="$HOME/build/opencv/opencv-$OPENCV_VERSION-build/"
+		export OPENCV_LINK_LIBS="opencv2"
+#		export OPENCV_INCLUDE_PATHS="$HOME/build/opencv/opencv-$OPENCV_VERSION-build/opencv2.framework/Headers/"
+		export OPENCV_INCLUDE_PATHS="$HOME/build/opencv/opencv-$OPENCV_VERSION-build/build/build-x86_64-macosx/install/include/"
 	fi
 	CARGO_FEATURES="$CARGO_FEATURES,contrib"
 elif [[ "$OS_FAMILY" == "linux" ]]; then
